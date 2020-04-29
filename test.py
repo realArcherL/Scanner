@@ -14,10 +14,6 @@ import glob
 print_lock = threading.Lock()
 
 
-# ip = socket.gethostbyname(target)
-# out_file_name = sys.argv[1] + "_Scan.html"
-
-
 def reader():
     file_name = sys.argv[1]
     with open(file_name, "r+") as inputFile:
@@ -87,6 +83,11 @@ if __name__ == '__main__':
         scanned_ports = []
         ips_count += 1
 
+        # directory creation and management.
+
+        directory_name = pathlib.Path(sys.argv[1] + "_scan")
+        child_directory = pathlib.Path(sys.argv[1] + "_scan/Scans")
+
         # checking for the last ips
         if ips_count == len(target):
             is_last = True
@@ -114,16 +115,17 @@ if __name__ == '__main__':
 
         # display
         table_headers = ["Ports", "Service"]
-        print(tabulate(scanned_ports, headers=table_headers))
-        print("\n")
+        if scanned_ports:
+            print(tabulate(scanned_ports, headers=table_headers))
+            print("\n")
+            html_file = tabulate(scanned_ports, headers=table_headers, tablefmt="html")
+        else:
+            html_file = "<h4>Either the IP/website is down, or something is incorrect, check for the Failed files<h4>"
+            print(html_file.strip("<h4>").strip("</h4>"))
+            with open(directory_name / "failed_ip", "a+") as file5:
+                file5.write(ips)
         print("Number of Ports open %s, Scan Finished in %.2f seconds\n" % (
             str(len(scanned_ports)), (end_time - start_time)))
-
-        html_file = tabulate(scanned_ports, headers=table_headers, tablefmt="html")
-
-        # directory creation and management.
-        directory_name = pathlib.Path(sys.argv[1] + "_scan")
-        child_directory = pathlib.Path(sys.argv[1] + "_scan/Scans")
 
         if directory_name.exists():
             logger(ips, html_file, is_last, ips_count, directory_name, child_directory)
