@@ -42,7 +42,7 @@ def logger(ips, html_file, is_last, ips_count, directory_name, child_directory):
 
     if is_last:
         out_file_name = sys.argv[1] + "_Scan.html"
-        read_files = glob.glob("*.txt")
+        read_files = glob.glob("Temp/Scans/*.txt", recursive=True)
 
         with open(child_directory / out_file_name, "wb") as outfile:
             for f in read_files:
@@ -85,6 +85,7 @@ if __name__ == '__main__':
     for ips in target:
 
         scanned_ports = []
+        ips_count += 1
 
         # checking for the last ips
         if ips_count == len(target):
@@ -103,7 +104,7 @@ if __name__ == '__main__':
         print("Scanning ports on IP: {}".format(ips))
 
         # Edit this to change the range of the ports to be scanner, total 1-65534
-        port_range = 1024
+        port_range = 500
 
         for worker in range(1, port_range):
             threads_queue.put(worker)
@@ -131,7 +132,6 @@ if __name__ == '__main__':
                 # Create target Directory
                 os.mkdir(directory_name)
                 os.mkdir(child_directory)
-                print("Directory ", directory_name, " Created ")
                 logger(ips, html_file, is_last, ips_count, directory_name, child_directory)
             except Exception as ex:
                 print(ex)
