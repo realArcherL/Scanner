@@ -42,7 +42,7 @@ def logger(ips, html_file, is_last, ips_count, directory_name, child_directory):
 
     if is_last:
         out_file_name = sys.argv[1] + "_Scan.html"
-        read_files = glob.glob("Temp/Scans/*.txt", recursive=True)
+        read_files = glob.glob(sys.argv[1] + "_scan/Scans/*.txt", recursive=True)
 
         with open(child_directory / out_file_name, "wb") as outfile:
             for f in read_files:
@@ -122,8 +122,8 @@ if __name__ == '__main__':
         html_file = tabulate(scanned_ports, headers=table_headers, tablefmt="html")
 
         # directory creation and management.
-        directory_name = pathlib.Path("Temp")
-        child_directory = pathlib.Path("Temp/Scans")
+        directory_name = pathlib.Path(sys.argv[1] + "_scan")
+        child_directory = pathlib.Path(sys.argv[1] + "_scan/Scans")
 
         if directory_name.exists():
             logger(ips, html_file, is_last, ips_count, directory_name, child_directory)
