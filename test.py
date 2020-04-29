@@ -48,14 +48,17 @@ def logger(ips, html_file, is_last, ips_count, directory_name, child_directory):
 
 def portscan(ips, port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    timeout_value = 20
+
+    # edit socket timeout value here.
+    timeout_value = 100
+
     s.settimeout(timeout_value)
     results = []
     try:
-        con = s.connect((ips, port))
+        con = s.connect((ips.rstrip(), port))
         with print_lock:
             service = str(socket.getservbyport(port, "tcp"))
-            results.append(port)
+            results.append(str(port))
             results.append(service)
             scanned_ports.append(results)
         con.close()
@@ -122,8 +125,6 @@ if __name__ == '__main__':
         else:
             html_file = "<h4>Either the IP/website is down, or something is incorrect, check for the Failed files<h4>"
             print(html_file.strip("<h4>").strip("</h4>"))
-            with open(directory_name / "failed_ip", "a+") as file5:
-                file5.write(ips)
         print("Number of Ports open %s, Scan Finished in %.2f seconds\n" % (
             str(len(scanned_ports)), (end_time - start_time)))
 
@@ -135,6 +136,8 @@ if __name__ == '__main__':
                 os.mkdir(directory_name)
                 os.mkdir(child_directory)
                 logger(ips, html_file, is_last, ips_count, directory_name, child_directory)
+                with open(directory_name / "failed_ip", "a+") as file5:
+                    file5.write(ips)
             except Exception as ex:
                 print(ex)
     print("Logging Complete")
