@@ -15,6 +15,8 @@ import argparse
 
 print_lock = threading.Lock()
 
+json_dict={}
+json_dict['scan']=[]
 
 def reader(file_name):
 
@@ -26,27 +28,22 @@ def reader(file_name):
 
 
 def logger(ips, html_file, is_last, ips_count, directory_name, child_directory):
-    # individual log files # Not required 
-    file_name = str(ips_count) + "_scan_log.txt"
-    file1 = open(child_directory / file_name, "a+")
-    title = "<body><h3>Scan result for {}: </h3></body>".format(ips)
-    file1.write(title)
-    file1.write(html_file)
-    file1.write("<br><br>")
-    file1.close()
+    # individual log files : Not required Instead writing to a single json file
+    # performance seems to be the same
 
     # logging which IP it was last on/ crashed
     with open(directory_name / "log", "w+") as log:
-        log.write(str(ips_count))
+        log.write("Scan stopped at " + str(ips) + "the "+str(ips_count)+"th"+" line\n")
+
 
     if is_last:
-        out_file_name = sys.argv[1] + "_Scan.html"
-        read_files = glob.glob(sys.argv[1] + "_scan/Scans/*.txt", recursive=True)
+        out_file_name = args.inputFileName + "_Scan.html"
+        # read_files = glob.glob(sys.argv[1] + "_scan/Scans/*.txt", recursive=True)
+        jsonfile = str(child_directory / out_file_name)+'.json'
 
-        with open(child_directory / out_file_name, "wb") as outfile:
-            for f in read_files:
-                with open(f, "rb") as infile:
-                    outfile.write(infile.read())
+        with open(jsonfile, 'w') as outfile:
+            json.dump(json_dict, outfile)
+
 
 
 def portscan(ips, port):
@@ -81,7 +78,7 @@ def threads():
 
     
 if __name__ == '__main__':
-    
+
     # Using argparse for cleaner program calling and user help
     parser = argparse.ArgumentParser(description='Port scanner')
     parser.add_argument("inputFileName",help="Input text file containing ip addresses one per line in dotted format") 
@@ -141,9 +138,11 @@ if __name__ == '__main__':
             print(tabulate(scanned_ports, headers=table_headers))
             print("\n")
             html_file = tabulate(scanned_ports, headers=table_headers, tablefmt="html")
+            json_dict['scan'].append({'ip':ips,'result':scanned_ports})
         else:
             html_file = "<h4>Either the IP/website is down, or something is incorrect, check for the Failed files<h4>"
             print(html_file.strip("<h4>").strip("</h4>"))
+            json_dict['scan'].append({'ip':ips,'result':None})
         print("Number of Ports open %s, Scan Finished in %.2f seconds\n" % (
             str(len(scanned_ports)), (end_time - start_time)))
 
@@ -159,6 +158,7 @@ if __name__ == '__main__':
                     file5.write(ips)
             except Exception as ex:
                 print(ex)
+
     print("Logging Complete")
     print("Generating report")
     
