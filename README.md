@@ -7,4 +7,4 @@ Ex. scenerio: "<input_file_name>_scans", Parent folder, "Scans", Child Folder. E
 
 The script was coded with performace in mind, and hence number of threads, timeout time and number of ports to be scanned weren't explicitly declared, instead the user can change these, by editing the code. (variables are higlighted in the code).
 
-For best scan results, use atleast 500 Threads, with timeout time as 60 seconds and port range till 3072.
+For best scan results, use atleast 500 Threads, with timeout time as 60 seconds and port range till 3072. This is almost equivalent to -T4 scan in nmap, (scan optimizations are yet another area to improve the code upon.)
