@@ -1,4 +1,5 @@
 The script works with following command and was explicitly built on python3 platform:
+
 ex: python3 <input_file name>
 
 Two folders get made for each input list the user provides, parent directory and child directory, along with a log file, which stores the index when the script failed, this helps to ensure to start the script back from where it failed. This has to be done manyally since the code doesn't know how to do it, itself. As in the user will have to manually remove the IP addresses from the earlier provided list till the index, shown in the file.
