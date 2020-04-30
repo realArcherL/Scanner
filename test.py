@@ -7,14 +7,17 @@ import socket
 import sys
 from datetime import datetime
 from tabulate import tabulate
+import json
 import pathlib
 import os
 import glob
+import argparse
 
 print_lock = threading.Lock()
 
 
-def reader():
+def reader(file_name):
+
     file_name = sys.argv[1]
     with open(file_name, "r+") as inputFile:
         ip_list = inputFile.read().splitlines()
@@ -23,7 +26,7 @@ def reader():
 
 
 def logger(ips, html_file, is_last, ips_count, directory_name, child_directory):
-    # individual log files
+    # individual log files # Not required 
     file_name = str(ips_count) + "_scan_log.txt"
     file1 = open(child_directory / file_name, "a+")
     title = "<body><h3>Scan result for {}: </h3></body>".format(ips)
@@ -75,9 +78,25 @@ def threads():
         threads_queue.task_done()
 
 
+
+    
 if __name__ == '__main__':
+    
+    # Using argparse for cleaner program calling and user help
+    parser = argparse.ArgumentParser(description='Port scanner')
+    parser.add_argument("inputFileName",help="Input text file containing ip addresses one per line in dotted format") 
+    parser.add_argument("--no_of_threads",help="No of threads",type=int,default=500)
+    parser.add_argument("--ports",help="The first n ports to scan",type=int,default=1000)
+
+    args = parser.parse_args()
+    
+
+    input_file = args.inputFileName
+    num_threads = args.no_of_threads
+    num_ports = args.ports
+
     threads_queue = Queue()
-    target = reader()
+    target = reader(input_file)
     ips_count = 0
     is_last = False
 
@@ -95,8 +114,8 @@ if __name__ == '__main__':
         if ips_count == len(target):
             is_last = True
 
-        # Edit this to set number of threads
-        number_of_threads = 500
+        # Edit this to set number of threads # No hard-coding please.. we shall use user-input
+        number_of_threads = num_threads
 
         for x in range(number_of_threads):
             threader = threading.Thread(target=threads)
@@ -107,12 +126,12 @@ if __name__ == '__main__':
         print("Scan Started: {}".format(datetime.now().strftime('%c')))
         print("Scanning ports on IP: {}".format(ips))
 
-        # Edit this to change the range of the ports to be scanner, total 1-65534
-        port_range = 500
+        # # No hard-coding please.. we shall use user-input
+        port_range = num_ports
 
         for worker in range(1, port_range):
             threads_queue.put(worker)
-
+        
         threads_queue.join()
         end_time = time.time()
 
@@ -142,3 +161,4 @@ if __name__ == '__main__':
                 print(ex)
     print("Logging Complete")
     print("Generating report")
+    
